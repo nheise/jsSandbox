@@ -20,7 +20,7 @@ function takeRequest(req, res) {
 		
 		var httpAuthorization = new HTTPAuthorization();
 		
-		var userPass = httpAuthorization.extractUserAndPasswordFromRequestHeader( req.headers );
+		var userPass = httpAuthorization.extractCredentialsFromRequestHeader( req.headers );
 		
 		console.log( userPass );
 
@@ -30,19 +30,18 @@ function takeRequest(req, res) {
 	else {
 		res.writeHead(401, 'Unauthorized', { 'Content-Type' : 'text/plain', 'WWW-Authenticate' : 'Basic realm="Locked Space"' });
 		res.end();
-		//res.end("All ok.", 'binary');
 	}
 }
 
 function HTTPAuthorization() {
 	
-	this.extractUserAndPasswordFromRequestHeader = function( requestHeader ) {
+	this.extractCredentialsFromRequestHeader = function( requestHeader ) {
 		var base64EncodedCredentials = extractbase64EncodedCredentials( requestHeader );
 		var decodedCredentials = decodeCredentials( base64EncodedCredentials );
-		return extractUserAndPasswordFromDecodedCredentials( decodedCredentials );
+		return extractCredentialsFromDecodedCredentials( decodedCredentials );
 	};
 	
-	function extractUserAndPasswordFromDecodedCredentials( decodedCredentials ) {
+	function extractCredentialsFromDecodedCredentials( decodedCredentials ) {
 		var array = decodedCredentials.split(":");
 		return { user : array[0], password : array[1] };
 	}
