@@ -48,7 +48,8 @@ var foo1 = new Test("hello ").foo;
 
 console.log(foo1("world!"));
 */
-/*
+
+
 var world = "world1";
 
 var world4 = {
@@ -58,42 +59,49 @@ var world4 = {
     }
 };
 
-console.log("blabla#{w.r()}balbla".match(/#\{([\w\(\)\.]+)\}/));
+//console.log("blabla#{w.r()}balbla".match(/#\{([\w\(\)\.]+)\}/));
 
-var text = "hello #{world}!!! #{world4.text} #{world} #{world4.text2()}";
+var text = "hello #{world}!!! #{world4.text} #{world} #{world4.text2()} ";
 
-var findRegExp = /#\{([\w\(\)\.]+)\}/;
+function parseText( text ) {
+    
+    var findRegExp = /#\{([\w\(\)\.]+)\}/g;
+    
+    while( hit = findRegExp.exec( text ) ) {
+        var evaluatedHit = evaluateHit( hit[1] );
 
-function parseText(text) {
-	while (hit = findRegExp.exec(text)) {
-        console.log(hit);
-  		var evaluatedHit = evaluateHit(hit[1]);
-        
-        if(evaluatedHit) {
-            text = replaceHit(text, hit, evaluatedHit);
+        if( evaluatedHit ) {
+            text = replaceHit( text, hit[0], evaluatedHit );
         }
-	}
-	return text;
+    }
+    
+    return text;
 }
 
 function evaluateHit(hit) {
-	var evaluatedHit = "";
 	try {
-		evaluatedHit = eval(hit);
+		return eval(hit);
 	}
 	catch(e) {
 		console.log(e.message);
+		return hit;
 	}
-	return evaluatedHit;
 }
 
-function replaceHit(text, hit, replacement) {
-	var replacedText = text.replace(new RegExp("#\\{" + hit[1] + "\\}"), replacement);
+function replaceHit(text, original, replacement) {
+    var replacePattern = new RegExp(escapeSpecialRegExpCharacters(original));
+	var replacedText = text.replace( replacePattern, replacement );
 	return replacedText;
 }
 
+function escapeSpecialRegExpCharacters( str ) {
+    var regex = /([\(\)\.\{\}])/g;
+    return str.replace(regex, "\\$1");
+}
+
 console.log(parseText(text));
-*/
+console.log(parseText(text));
+
 
 /*
 var router = require('./RESTRouter.js');
