@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Test</title>
+<script type="text/javascript">
+<!--//
+function echo() {
+	alert(document.body);
+}
+
+function postCreationLoad() {
+	alert(this.document);
+	alert("post creation load.");
+}
+
+window.onload = postCreationLoad();
+//-->
+</script>
+</head>
+<body>
+<div style="width: 100px; height: 50px; background-color: lightGreen; cursor: pointer; text-align: center; vertical-align: middle;" onclick="echo()">click here</div>
+</body>
+</html>
