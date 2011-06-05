@@ -16,20 +16,27 @@ function takeRequest(req, res) {
 	console.log(req.headers);
 	console.log(req.url);
 	
-	if(req.headers.authorization) {
-		
-		var httpAuthorization = new HTTPAuthorization();
-		
-		var userPass = httpAuthorization.extractCredentialsFromRequestHeader( req.headers );
-		
-		console.log( userPass );
+	if(req.url.match(/.+?secure.*/)) {
+    
+	    if(req.headers.authorization) {
+	        
+	        var httpAuthorization = new HTTPAuthorization();
+	        
+	        var userPass = httpAuthorization.extractCredentialsFromRequestHeader( req.headers );
+	        
+	        console.log( userPass );
 
-		res.writeHead(200, 'OK', { 'Content-Type' : 'text/plain' });
-		res.end("checking...", 'binary');
+	        res.writeHead(200, 'OK', { 'Content-Type' : 'text/plain' });
+	        res.end("secure ... checking...", 'binary');
+	    }
+	    else {
+	        res.writeHead(401, 'Unauthorized', { 'Content-Type' : 'text/plain', 'WWW-Authenticate' : 'Basic realm="Locked Space"' });
+	        res.end();
+	    }	
 	}
 	else {
-		res.writeHead(401, 'Unauthorized', { 'Content-Type' : 'text/plain', 'WWW-Authenticate' : 'Basic realm="Locked Space"' });
-		res.end();
+	    res.writeHead(200, 'OK', { 'Content-Type' : 'text/plain' });
+        res.end("free area...", 'binary');
 	}
 }
 
