@@ -59,23 +59,19 @@ var world4 = {
     }
 };
 
-//console.log("blabla#{w.r()}balbla".match(/#\{([\w\(\)\.]+)\}/));
-
-var text = "hello #{world}!!! #{world4.text} #{world} #{world4.text2()} ";
+var text = "hello #{world}!!! #{world4.text} #{fail} #{world} #{world4.text2()} ";
 
 function parseText( text ) {
     
-    var findRegExp = /#\{([\w\(\)\.]+)\}/g;
+    var findRegExp = /#\{([\w\(\)\.]+)\}/;
     
-    while( hit = findRegExp.exec( text ) ) {
-        var evaluatedHit = evaluateHit( hit[1] );
-
-        if( evaluatedHit ) {
-            text = replaceHit( text, hit[0], evaluatedHit );
-        }
+    var hit = text.split( findRegExp );
+    
+    for( i = 1; i < hit.length; i+=2 ) {
+        hit[i] = evaluateHit( hit[i] );
     }
     
-    return text;
+    return hit.join( "" );
 }
 
 function evaluateHit(hit) {
@@ -88,20 +84,7 @@ function evaluateHit(hit) {
 	}
 }
 
-function replaceHit(text, original, replacement) {
-    var replacePattern = new RegExp(escapeSpecialRegExpCharacters(original));
-	var replacedText = text.replace( replacePattern, replacement );
-	return replacedText;
-}
-
-function escapeSpecialRegExpCharacters( str ) {
-    var regex = /([\(\)\.\{\}])/g;
-    return str.replace(regex, "\\$1");
-}
-
-console.log(parseText(text));
-console.log(parseText(text));
-
+console.log( parseText( text ) );
 
 /*
 var router = require('./RESTRouter.js');
