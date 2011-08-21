@@ -1,3 +1,4 @@
+
 /*
 var util = require('util');
 var events = require('events');
@@ -48,7 +49,7 @@ var foo1 = new Test("hello ").foo;
 
 console.log(foo1("world!"));
 */
-
+/*
 
 var world = "world1";
 
@@ -85,7 +86,7 @@ function evaluateHit(hit) {
 }
 
 console.log( parseText( text ) );
-
+*/
 /*
 var router = require('./RESTRouter.js');
 
