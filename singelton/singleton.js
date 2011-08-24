@@ -1,4 +1,14 @@
 
+var count = 0;
+
+;(function countUp() {
+    count++;
+})();
+
+exports.getCount = function() {
+    return count;
+};
+
 var singletonText = "noChange";
 
 exports.getSingletonText = function() {
