@@ -17,6 +17,15 @@ exports.HTTPAuthorization = function HTTPAuthorization() {
       return buffer.toString('utf8');
    }
    
+   this.createAuthorizationRequestHeaderField = function( credentials ) {
+      return { authorization : encodeCredentials( credentials ) };
+   };
+   
+   function encodeCredentials( credentials ) {
+      var buffer = new Buffer(credentials.user + ":" + credentials.password, 'base64');
+      return buffer.toString('utf8');
+   }
+   
    function extractbase64EncodedCredentials( requestHeader ) {
       return requestHeader.authorization.split(" ")[1];
    }
