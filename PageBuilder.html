@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<meta charset=utf-8 />
+<title>Page</title>
+<script type="text/javascript">
+  
+  var page = {
+    href : 'http://nheise.net/html/pages/425342',
+    head : {},
+    body : {
+      href : 'http://nheise.net/html/elements/body/724352',
+      children : [
+        'http://nheise.net/html/elements/div/264252'
+      ]
+    }
+  };
+
+  var elementDefs = {
+    'http://nheise.net/html/elements/textarea' : {
+      href : 'http://nheise.net/html/elements/textarea',
+      meta : '<textarea id="#{element.href}">#{data.text}</textarea>'
+    },
+    'http://nheise.net/html/elements/div' : {
+      href : 'http://nheise.net/html/elements/div',
+      meta : '<div id="#{element.href}"></div>'
+    },
+    'http://nheise.net/html/elements/label' : {
+      href : 'http://nheise.net/html/elements/label',
+      meta : '<label id="#{element.href}" for="#{element.forRef}">#{data.text}</label>'
+    }
+  };
+  
+  var elements = {
+    'http://nheise.net/html/elements/textarea/423542' : {
+      href : 'http://nheise.net/html/elements/textarea/423542',
+      type : 'http://nheise.net/html/elements/textarea',
+      dpInstance : 'http://nheise.net/reports/20123',
+      dataMap : { 
+        text : 'comment'
+      }
+    },
+    'http://nheise.net/html/elements/div/264252' : {
+      href : 'http://nheise.net/html/elements/div/264252',
+      type : 'http://nheise.net/html/elements/div',
+      children : [
+        'http://nheise.net/html/elements/label/352436',
+        'http://nheise.net/html/elements/textarea/423542'
+      ]
+    },
+    'http://nheise.net/html/elements/label/352436' : {
+      href : 'http://nheise.net/html/elements/label/352436',
+      type : 'http://nheise.net/html/elements/label',
+      forRef : 'http://nheise.net/html/elements/textarea/423542',
+      dataMap : { 
+        text : 'Kommentar:'
+      }
+    }
+  };
+      
+  var dpInstances = {
+    'http://nheise.net/reports/20123' : {
+      href : 'http://nheise.net/reports/20123',
+      dp : 'http://nheise.net/report',
+      comment : 'Da ist etwas falsch gelaufen.'
+    }
+  };
+  
+  function DOMBuilder() {
+    
+    const idSelectorBuilder = new IdSelectorBuilder();
+    
+    this.buildBody = function( page ) {
+      
+      for( i in page.body.children ) {
+        buildElement( page.body.children[i], page.body.href );
+      }
+      
+    };
+    
+    function buildElement( href, parentHref ) {
+      
+      var element = getElement( href );
+      
+      var dpInstance = getDpInstance( element );
+      
+      var elementDef = getElementDef( element );
+      
+      var data = fillDataMapWithData( element.dataMap, dpInstance );
+      
+      var domPart = parseDataIntoElementDef( data, element, elementDef );
+      
+      appendIntoDOM( parentHref, domPart );
+      
+      if( element.children ) {
+        for( i in element.children ) {
+          buildElement( element.children[i], href ) ;
+        }
+      }
+      
+    };
+    
+    function appendIntoDOM( parentHref, domPart ) {
+      var escapedIdSelector = idSelectorBuilder.build( parentHref );
+      
+      $( escapedIdSelector ).append( domPart );
+    };
+    
+    function getElement( href ) {
+      return elements[href];
+    };
+
+    function getDpInstance( element ) {
+     return dpInstances[ element.dpInstance ]; 
+    };
+    
+    function getElementDef( element ) {
+      return elementDefs[ element.type ];
+    };
+    
+    function parseDataIntoElementDef( data, element, elementDef ) {
+      const findRegExp = /#\{([\w\(\)\.]+)\}/;
+      
+      var hit = elementDef.meta.split( findRegExp );
+
+      for( i = 1; i < hit.length; i+=2 ) {
+
+        hit[i] = function(hit) {
+          try {
+            return eval(hit);
+          }
+          catch(e) {
+            return hit;
+          }
+        }( hit[i] );
+      }
+
+      return hit.join( "" );
+    }
+    
+    function fillDataMapWithData( dataMap, dpInstance ) {
+      for( key in dataMap ) {
+        if( dpInstance && dpInstance[dataMap[key]] ) {
+          dataMap[key] = dpInstance[dataMap[key]];
+        }
+      }
+      return dataMap;
+    }
+    
+  }
+  
+  function IdSelectorBuilder() {
+    
+    this.build = function( id ) {
+      return "#" + escapeFullStop( escapeSlash( escapeColon( id ) ) );
+    }
+    
+    function escapeColon( str ) {
+      return str.replace( /\:/, "\\\:" );
+    };
+    
+    function escapeSlash( str ) {
+      return str.replace( /\//g, "\\/");
+    }
+    
+    function escapeFullStop( str ) {
+      return str.replace( /\./, "\\.");
+    } 
+    
+  }
+  
+  $(window).load(function () {
+    prepareBody( page );
+    
+    new DOMBuilder().buildBody( page );
+    
+  });
+  
+  function prepareBody( page ) {
+    $("body").attr( "id" , page.body.href ); 
+  }
+    
+</script>
+</head>
+<body>
+</body>
+</html>
