@@ -7,11 +7,11 @@
 <script type="text/javascript">
   
   var page = {
-    href : 'http://nheise.net/html/pages/425342',
-    head : {},
-    body : {
-      href : 'http://nheise.net/html/elements/body/724352',
-      children : [
+    'href' : 'http://nheise.net/html/pages/425342',
+    'head' : {},
+    'body' : {
+      'href' : 'http://nheise.net/html/elements/body/724352',
+      'children' : [
         'http://nheise.net/html/elements/div/264252'
       ]
     }
@@ -19,51 +19,68 @@
 
   var elementDefs = {
     'http://nheise.net/html/elements/textarea' : {
-      href : 'http://nheise.net/html/elements/textarea',
-      meta : '<textarea id="#{element.href}">#{data.text}</textarea>'
+      'href' : 'http://nheise.net/html/elements/textarea',
+      'tag' : '<textarea></textarea>',
+      'fields' : {
+        'attributes' : [ 'class' ],
+        'value' : ''
+      }
     },
     'http://nheise.net/html/elements/div' : {
-      href : 'http://nheise.net/html/elements/div',
-      meta : '<div id="#{element.href}"></div>'
+      'href' : 'http://nheise.net/html/elements/div',
+      'tag' : '<div></div>',
+      'fields' : {
+        'attributes' : [ 'class' ]
+      }
     },
     'http://nheise.net/html/elements/label' : {
-      href : 'http://nheise.net/html/elements/label',
-      meta : '<label id="#{element.href}" for="#{element.forRef}">#{data.text}</label>'
+      'href' : 'http://nheise.net/html/elements/label',
+      'tag' : '<label></label>',
+      'fields' : {
+        'attributes' : [ 'for', 'class' ],
+        'value' : ''
+      }
     }
   };
   
   var elements = {
     'http://nheise.net/html/elements/textarea/423542' : {
-      href : 'http://nheise.net/html/elements/textarea/423542',
-      type : 'http://nheise.net/html/elements/textarea',
-      dpInstance : 'http://nheise.net/reports/20123',
-      dataMap : { 
-        text : 'comment'
+      'href' : 'http://nheise.net/html/elements/textarea/423542',
+      'type' : 'http://nheise.net/html/elements/textarea',
+      'dpInstance' : 'http://nheise.net/reports/20123',
+      'fieldDataMap' : {
+        'attributes' : {},
+        'value' : 'comment'
       }
     },
     'http://nheise.net/html/elements/div/264252' : {
-      href : 'http://nheise.net/html/elements/div/264252',
-      type : 'http://nheise.net/html/elements/div',
-      children : [
+      'href' : 'http://nheise.net/html/elements/div/264252',
+      'type' : 'http://nheise.net/html/elements/div',
+      'fieldDataMap' : {
+        'attributes' : {}
+      },
+      'children' : [
         'http://nheise.net/html/elements/label/352436',
         'http://nheise.net/html/elements/textarea/423542'
       ]
     },
     'http://nheise.net/html/elements/label/352436' : {
-      href : 'http://nheise.net/html/elements/label/352436',
-      type : 'http://nheise.net/html/elements/label',
-      forRef : 'http://nheise.net/html/elements/textarea/423542',
-      dataMap : { 
-        text : 'Kommentar:'
+      'href' : 'http://nheise.net/html/elements/label/352436',
+      'type' : 'http://nheise.net/html/elements/label',
+      'fieldDataMap' : {
+        'attributes' : {
+          'for' : 'http://nheise.net/html/elements/textarea/423542'
+        },
+        'value' : 'Kommentar:'
       }
     }
   };
       
   var dpInstances = {
     'http://nheise.net/reports/20123' : {
-      href : 'http://nheise.net/reports/20123',
-      dp : 'http://nheise.net/report',
-      comment : 'Da ist etwas falsch gelaufen.'
+      'href' : 'http://nheise.net/reports/20123',
+      'dp' : 'http://nheise.net/report',
+      'comment' : 'Da ist etwas falsch gelaufen.'
     }
   };
   
@@ -87,11 +104,13 @@
       
       var elementDef = getElementDef( element );
       
-      var data = fillDataMapWithData( element.dataMap, dpInstance );
+      mapElementFieldValuesToDPInstanceFieldValues( element, dpInstance );
       
-      var domPart = parseDataIntoElementDef( data, element, elementDef );
+      var attributes = createElementAttributes( element, dpInstance );
       
-      appendIntoDOM( parentHref, domPart );
+      appendIntoDOM( parentHref, elementDef, attributes );
+      
+      addValueIfElementHasOne( element );
       
       if( element.children ) {
         for( i in element.children ) {
@@ -101,10 +120,49 @@
       
     };
     
-    function appendIntoDOM( parentHref, domPart ) {
-      var escapedIdSelector = idSelectorBuilder.build( parentHref );
+    function mapElementFieldValuesToDPInstanceFieldValues( element, dpInstance ) {
+      // try map value
+      if( dpInstance && element.fieldDataMap.value && dpInstance[ element.fieldDataMap.value ] ) {
+        element.fieldDataMap.value = dpInstance[ element.fieldDataMap.value ];
+      }
+
+      // map attributes
+      var attributeMap = element.fieldDataMap.attributes;
+
+      for( key in attributeMap ) {
+        // has map counter part in data pattern instance.
+        if( dpInstance && dpInstance[attributeMap[key]] ) {
+          attributeMap[key] = dpInstance[attributeMap[key]];
+        }
+      }
+
+    };
+    
+    function addValueIfElementHasOne( element ) {
+      if( element.fieldDataMap.value ) {
+        var escapedIdSelector = idSelectorBuilder.build( element.href );
+        
+        $( escapedIdSelector ).append( element.fieldDataMap.value );
+      }
+    };
+    
+    function createElementAttributes( element, dpInstance ) {
       
-      $( escapedIdSelector ).append( domPart );
+      var attributes = { 'id' : element.href };
+      
+      var attributeMap = element.fieldDataMap.attributes;
+      
+      for( key in attributeMap ) {
+        attributes[key] = attributeMap[key];
+      }
+      
+      return attributes;
+    }
+    
+    function appendIntoDOM( parentHref, elementDef, attributes ) {
+      var escapedParentIdSelector = idSelectorBuilder.build( parentHref );
+      
+      $( elementDef.tag, attributes ).appendTo( escapedParentIdSelector );
     };
     
     function getElement( href ) {
@@ -112,41 +170,12 @@
     };
 
     function getDpInstance( element ) {
-     return dpInstances[ element.dpInstance ]; 
+     return dpInstances[ element.dpInstance ];
     };
     
     function getElementDef( element ) {
       return elementDefs[ element.type ];
     };
-    
-    function parseDataIntoElementDef( data, element, elementDef ) {
-      const findRegExp = /#\{([\w\(\)\.]+)\}/;
-      
-      var hit = elementDef.meta.split( findRegExp );
-
-      for( i = 1; i < hit.length; i+=2 ) {
-
-        hit[i] = function(hit) {
-          try {
-            return eval(hit);
-          }
-          catch(e) {
-            return hit;
-          }
-        }( hit[i] );
-      }
-
-      return hit.join( "" );
-    }
-    
-    function fillDataMapWithData( dataMap, dpInstance ) {
-      for( key in dataMap ) {
-        if( dpInstance && dpInstance[dataMap[key]] ) {
-          dataMap[key] = dpInstance[dataMap[key]];
-        }
-      }
-      return dataMap;
-    }
     
   }
   
@@ -166,7 +195,7 @@
     
     function escapeFullStop( str ) {
       return str.replace( /\./, "\\.");
-    } 
+    }
     
   }
   
@@ -178,7 +207,7 @@
   });
   
   function prepareBody( page ) {
-    $("body").attr( "id" , page.body.href ); 
+    $("body").attr( "id" , page.body.href );
   }
     
 </script>
@@ -186,3 +215,4 @@
 <body>
 </body>
 </html>
+
