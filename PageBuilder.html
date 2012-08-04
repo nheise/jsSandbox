@@ -20,11 +20,17 @@
         'http://nheise.net/html/elements/div/63534',
         'http://nheise.net/html/elements/div/264252'
       ]
+    },
+    'requestArgs' : { key : 'SUBSYSTEM' },
+    'dataPatterns' : { 
+      'tenant' : {
+        'href' : 'http://nheise.net/tenant',
+        'type' : 'entity',
+        'uriPatternKeyValueMap' : {
+          'key' : 'requestArgs.key'
+        }
+      }
     }
-  };
-  
-  var styles = {
-    
   };
 
   var elementDefs = {
@@ -74,16 +80,15 @@
       'type' : 'http://nheise.net/html/elements/style',
       'fieldDataMap' : {
         'attributes' : {},
-        'value' : 'label.description { vertical-align: top; }'
+        'value' : 'label.description { vertical-align: top; } textarea, input { font-family: verdana; font-size: .7em; }'
       }
     },
     'http://nheise.net/html/elements/textarea/423542' : {
       'href' : 'http://nheise.net/html/elements/textarea/423542',
       'type' : 'http://nheise.net/html/elements/textarea',
-      'dpInstance' : 'http://nheise.net/tenants/20123',
       'fieldDataMap' : {
         'attributes' : {},
-        'value' : 'description'
+        'value' : 'tenant.description'
       }
     },
     'http://nheise.net/html/elements/div/264252' : {
@@ -122,9 +127,8 @@
     'http://nheise.net/html/elements/textfield/534263' : {
       'href' : 'http://nheise.net/html/elements/textfield/534263',
       'type' : 'http://nheise.net/html/elements/textfield',
-      'dpInstance' : 'http://nheise.net/tenants/20123',
       'fieldDataMap' : {
-        'attributes' : { 'value' : 'key' }
+        'attributes' : { 'value' : 'tenant.key' }
       }
     },
     'http://nheise.net/html/elements/label/53426' : {
@@ -140,24 +144,130 @@
   };
       
   var dpInstances = {
-    'http://nheise.net/tenants/20123' : {
-      'href' : 'http://nheise.net/tenants/20123',
-      'dp' : 'http://nheise.net/tenants',
+    'http://nheise.net/tenants/SYSTEM' : {
+      'href' : 'http://nheise.net/tenants/SYSTEM',
+      'dp' : 'http://nheise.net/tenant',
       'fields' : {
         'key' : 'SYSTEM',
         'name' : 'System',
         'description' : 'Der System Mandat.'
       }
+    },
+    'http://nheise.net/tenants/SUBSYSTEM' : {
+      'href' : 'http://nheise.net/tenants/SUBSYSTEM',
+      'dp' : 'http://nheise.net/tenant',
+      'fields' : {
+        'key' : 'SUBSYSTEM',
+        'name' : 'Sub-System',
+        'description' : 'Der Mandant unter dem System Mandat.',
+        'parent' : 'http://nheise.net/tenants/SYSTEM'
+      }
     }
   };
   
+  var dataPatterns = {
+    'http://nheise.net/tenant' : {
+      'href' : 'http://nheise.net/tenant',
+      'name' : 'tenant',
+      'fields' : [ 'key', 'name', 'description' ],
+      'dpInstanceURIPatterns' : { 
+        'entity' : 'http://nheise.net/tenants/{key}',
+        'query' : 'http://nheise.net/tenants'
+      }
+    }
+  };
+      
+  function DPInstancesLoader( page ) {
+    
+    this.load = function() {
+      var dataPatterns = loadDataPattern();
+      
+      var dpInstanceURIs = buildDPInstancesURIs( dataPatterns );
+      
+      var dpInstances = loadDPInstances( dpInstanceURIs );
+      
+      return dpInstances;
+    };
+    
+    function buildDPInstancesURIs( dataPatterns ) {
+      var dpInstanceURIs = {};
+      
+      for( dpName in dataPatterns ) {
+        dpInstanceURIs[ dpName ] = new DPInstanceURIBuilder( dataPatterns[ dpName ], page.dataPatterns[ dpName ], page.requestArgs ).build(); 
+      }
+      
+      return dpInstanceURIs;
+    }
+    
+    function loadDPInstances( dpInstanceURIs ) {
+      
+      var dpInstances = {};
+      
+      for( dpName in dpInstanceURIs ) {
+        
+        dpInstances[ dpName ] = getDPInstances( dpInstanceURIs[ dpName ] );
+        
+      }
+      
+      return dpInstances;
+    };
+    
+    function loadDataPattern() {
+      var dataPatterns = {};
+      
+      for( dpName in page.dataPatterns ) {
+        dataPatterns[ dpName ] = getDataPattern( page.dataPatterns[ dpName ].href ); 
+      }
+      
+      return dataPatterns;
+    };
+  };
+    
+  function getDPInstances( href ) {
+    return dpInstances[ href ];
+  };
+  
+  function getDataPattern( href ) {
+    return dataPatterns[ href ];
+  };
+ 
+  function DPInstanceURIBuilder( dataPattern, elementDPOptions, requestArgs ) {
+   
+    this.build = function() {
+      
+      var returnStatement = buildReturnStatement();
+      
+      var params = [ 'requestArgs' ];
+
+      var paramObjects = [ requestArgs ];
+        
+      return new Function( params, returnStatement ).apply( this, paramObjects );
+    };
+    
+    function buildReturnStatement() {
+      
+      var returnStatement = dataPattern.dpInstanceURIPatterns[elementDPOptions.type].replace( /{/g, '"+' );
+      
+      returnStatement = "return \"" + returnStatement.replace( /}/g, '+"' ) + "\"";
+      
+      for( key in elementDPOptions.uriPatternKeyValueMap ) {
+        returnStatement = returnStatement.replace( new RegExp("\\+" + key + "\\+"), "+" + elementDPOptions.uriPatternKeyValueMap[ key ] + "+" );
+      }
+
+      return returnStatement;
+    };
+  }
+
   function DOMBuilder( page ) {
     
     const idSelectorBuilder = new IdSelectorBuilder();
+    const dpInstanceLoader = new DPInstancesLoader( page );
     
     this.build = function() {
       prepareBodyAndHead();
-    
+      
+      page.dpInstances = dpInstanceLoader.load();
+      
       buildHead();
       buildBody();
     };
@@ -187,18 +297,16 @@
       
       var element = getElement( href );
       
-      var dpInstance = getDpInstance( element );
-      
       var elementDef = getElementDef( element );
       
-      mapElementFieldValuesToDPInstanceFieldValues( element, dpInstance );
-      
-      var attributes = createElementAttributes( element, dpInstance );
+      mapElementFieldValuesToDPInstanceFieldValues( element );
+
+      var attributes = createElementAttributes( element );
       
       appendIntoDOM( parentHref, elementDef, attributes );
       
       addValueIfElementHasOne( element );
-      
+
       if( element.children ) {
         for( i in element.children ) {
           buildElement( element.children[i], href ) ;
@@ -206,22 +314,23 @@
       }
     };
     
-    function mapElementFieldValuesToDPInstanceFieldValues( element, dpInstance ) {
+    function mapElementFieldValuesToDPInstanceFieldValues( element ) {
+      
+      var mapper = new DPInstancesFieldValueMapper();
+      mapper.putDPInstances( page.dpInstances );
+      
       // try map value
-      if( dpInstance && element.fieldDataMap.value && dpInstance.fields[ element.fieldDataMap.value ] ) {
-        element.fieldDataMap.value = dpInstance.fields[ element.fieldDataMap.value ];
+      if( element.fieldDataMap.value ) {
+        element.fieldDataMap.value = mapper.mapValue( element.fieldDataMap.value );
       }
-
+      
       // map attributes
       var attributeMap = element.fieldDataMap.attributes;
 
       for( key in attributeMap ) {
-        // has map counter part in data pattern instance.
-        if( dpInstance && dpInstance.fields[attributeMap[key]] ) {
-          attributeMap[key] = dpInstance.fields[attributeMap[key]];
-        }
+        attributeMap[key] = mapper.mapValue(attributeMap[key]);
       }
-
+      
     };
     
     function addValueIfElementHasOne( element ) {
@@ -254,10 +363,6 @@
     function getElement( href ) {
       return elements[href];
     };
-
-    function getDpInstance( element ) {
-      return dpInstances[ element.dpInstance ];
-    };
     
     function getElementDef( element ) {
       return elementDefs[ element.type ];
@@ -265,11 +370,32 @@
     
   }
   
+  function DPInstancesFieldValueMapper() {};
+  DPInstancesFieldValueMapper.prototype.mapValue = function( expression ) {
+    var evaled;
+    try {
+      evaled = eval( 'this.' + expression );
+    }
+    catch(e) {
+      
+      evaled = expression;
+    }
+    return evaled ? evaled : expression;
+  };
+  DPInstancesFieldValueMapper.prototype.putDPInstances = function( dpInstances ) {
+    for( var dpInstanceName in dpInstances ) {
+      this.putDPInstance( dpInstanceName, dpInstances[ dpInstanceName ] );
+    }
+  };
+  DPInstancesFieldValueMapper.prototype.putDPInstance = function( dpInstanceName, dpInstance ) {
+    this[ dpInstanceName ] = dpInstance.fields;
+  };
+  
   function IdSelectorBuilder() {
     
     this.build = function( id ) {
       return "#" + escapeFullStop( escapeSlash( escapeColon( id ) ) );
-    }
+    };
     
     function escapeColon( str ) {
       return str.replace( /\:/, "\\\:" );
@@ -277,11 +403,11 @@
     
     function escapeSlash( str ) {
       return str.replace( /\//g, "\\/");
-    }
+    };
     
     function escapeFullStop( str ) {
       return str.replace( /\./, "\\.");
-    }
+    };
     
   }
   
@@ -296,4 +422,3 @@
 <body>
 </body>
 </html>
-
