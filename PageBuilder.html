@@ -178,56 +178,54 @@
   };
       
   function DPInstancesLoader( page ) {
+    this.page = page;
+  }
+  DPInstancesLoader.prototype.load = function() {
+    this.dataPatterns = this.loadDataPattern();
     
-    this.load = function() {
-      var dataPatterns = loadDataPattern();
-      
-      var dpInstanceURIs = buildDPInstancesURIs( dataPatterns );
-      
-      var dpInstances = loadDPInstances( dpInstanceURIs );
-      
-      return dpInstances;
-    };
+    this.dpInstanceURIs = this.buildDPInstancesURIs();
     
-    function buildDPInstancesURIs( dataPatterns ) {
-      var dpInstanceURIs = {};
-      
-      for( dpName in dataPatterns ) {
-        dpInstanceURIs[ dpName ] = new DPInstanceURIBuilder( dataPatterns[ dpName ], page.dataPatterns[ dpName ], page.requestArgs ).build(); 
-      }
-      
-      return dpInstanceURIs;
-    }
+    this.dpInstances = this.loadDPInstances();
     
-    function loadDPInstances( dpInstanceURIs ) {
-      
-      var dpInstances = {};
-      
-      for( dpName in dpInstanceURIs ) {
-        
-        dpInstances[ dpName ] = getDPInstances( dpInstanceURIs[ dpName ] );
-        
-      }
-      
-      return dpInstances;
-    };
-    
-    function loadDataPattern() {
-      var dataPatterns = {};
-      
-      for( dpName in page.dataPatterns ) {
-        dataPatterns[ dpName ] = getDataPattern( page.dataPatterns[ dpName ].href ); 
-      }
-      
-      return dataPatterns;
-    };
+    return this.dpInstances;
   };
     
-  function getDPInstances( href ) {
+  DPInstancesLoader.prototype.buildDPInstancesURIs = function() {
+    var dpInstanceURIs = {};
+    
+    for( dpName in this.dataPatterns ) {
+      dpInstanceURIs[ dpName ] = new DPInstanceURIBuilder( this.dataPatterns[ dpName ], this.page.dataPatterns[ dpName ], this.page.requestArgs ).build(); 
+    }
+    
+    return dpInstanceURIs;
+  };    
+  DPInstancesLoader.prototype.loadDPInstances = function() {
+    
+    var dpInstances = {};
+    
+    for( dpName in this.dpInstanceURIs ) {
+      
+      dpInstances[ dpName ] = this.getDPInstances( this.dpInstanceURIs[ dpName ] );
+      
+    }
+    
+    return dpInstances;
+  };    
+  DPInstancesLoader.prototype.loadDataPattern = function() {
+    var dataPatterns = {};
+    
+    for( dpName in this.page.dataPatterns ) {
+      dataPatterns[ dpName ] = this.getDataPattern( this.page.dataPatterns[ dpName ].href ); 
+    }
+    
+    return dataPatterns;
+  };
+    
+  DPInstancesLoader.prototype.getDPInstances = function( href ) {
     return dpInstances[ href ];
   };
   
-  function getDataPattern( href ) {
+  DPInstancesLoader.prototype.getDataPattern = function( href ) {
     return dataPatterns[ href ];
   };
  
@@ -258,117 +256,111 @@
     };
   }
 
-  function DOMBuilder( page ) {
-    
-    const idSelectorBuilder = new IdSelectorBuilder();
-    const dpInstanceLoader = new DPInstancesLoader( page );
-    
-    this.build = function() {
-      prepareBodyAndHead();
-      
-      page.dpInstances = dpInstanceLoader.load();
-      
-      buildHead();
-      buildBody();
-    };
-  
-    function prepareBodyAndHead() {
-      $("head").attr( "id" , page.head.href );
-      $("body").attr( "id" , page.body.href );
-    }
-    
-    function buildHead() {
-      
-      for( i in page.head.children ) {
-        buildElement( page.head.children[i], page.head.href );
-      }
-      
-    };
-    
-    function buildBody() {
-      
-      for( i in page.body.children ) {
-        buildElement( page.body.children[i], page.body.href );
-      }
-      
-    };
-    
-    function buildElement( href, parentHref ) {
-      
-      var element = getElement( href );
-      
-      var elementDef = getElementDef( element );
-      
-      mapElementFieldValuesToDPInstanceFieldValues( element );
-
-      var attributes = createElementAttributes( element );
-      
-      appendIntoDOM( parentHref, elementDef, attributes );
-      
-      addValueIfElementHasOne( element );
-
-      if( element.children ) {
-        for( i in element.children ) {
-          buildElement( element.children[i], href ) ;
-        }
-      }
-    };
-    
-    function mapElementFieldValuesToDPInstanceFieldValues( element ) {
-      
-      var mapper = new DPInstancesFieldValueMapper();
-      mapper.putDPInstances( page.dpInstances );
-      
-      // try map value
-      if( element.fieldDataMap.value ) {
-        element.fieldDataMap.value = mapper.mapValue( element.fieldDataMap.value );
-      }
-      
-      // map attributes
-      var attributeMap = element.fieldDataMap.attributes;
-
-      for( key in attributeMap ) {
-        attributeMap[key] = mapper.mapValue(attributeMap[key]);
-      }
-      
-    };
-    
-    function addValueIfElementHasOne( element ) {
-      if( element.fieldDataMap.value ) {
-        var escapedIdSelector = idSelectorBuilder.build( element.href );
-        
-        $( escapedIdSelector ).append( element.fieldDataMap.value );
-      }
-    };
-    
-    function createElementAttributes( element, dpInstance ) {
-      
-      var attributes = { 'id' : element.href };
-      
-      var attributeMap = element.fieldDataMap.attributes;
-      
-      for( key in attributeMap ) {
-        attributes[key] = attributeMap[key];
-      }
-      
-      return attributes;
-    }
-    
-    function appendIntoDOM( parentHref, elementDef, attributes ) {
-      var escapedParentIdSelector = idSelectorBuilder.build( parentHref );
-      
-      $( elementDef.tag ).attr( attributes ).appendTo( escapedParentIdSelector );
-    };
-    
-    function getElement( href ) {
-      return elements[href];
-    };
-    
-    function getElementDef( element ) {
-      return elementDefs[ element.type ];
-    };
-    
+  function DOMPageBuilder( page ) {
+    this.page = page;
+    this.dpInstanceLoader = new DPInstancesLoader( this.page );
   }
+  DOMPageBuilder.prototype.build = function() {
+    this.prepareBodyAndHead();
+    
+    this.page.dpInstances = this.dpInstanceLoader.load();
+    
+    this.buildHead();
+    this.buildBody();
+  };
+  DOMPageBuilder.prototype.prepareBodyAndHead = function() {
+    $("head").attr( "id" , this.page.head.href );
+    $("body").attr( "id" , this.page.body.href );
+  }
+  DOMPageBuilder.prototype.buildHead = function() {
+    for( i in this.page.head.children ) {
+      new DOMElementBuilder( this.page.head.children[i], this.page.head.href, this.page ).build();
+    }
+    
+  }; 
+  DOMPageBuilder.prototype.buildBody = function() {
+    for( i in this.page.body.children ) {
+      new DOMElementBuilder( this.page.body.children[i], this.page.body.href, this.page ).build();
+    }
+  };
+  
+  function DOMElementBuilder( href, parentHref, page ) {
+    this.href = href
+    this.parentHref = parentHref;
+    this.page = page;
+    
+    this.idSelectorBuilder = new IdSelectorBuilder();
+  };
+  
+  DOMElementBuilder.prototype.build = function() {
+    this.element = this.getElement();
+
+    this.elementDef = this.getElementDef();
+    
+    this.mapElementFieldValuesToDPInstanceFieldValues();
+    
+    this.attributes = this.createElementAttributes();
+    
+    this.appendIntoDOM();
+    
+    this.addValueIfElementHasOne();
+    
+    if( this.element.children ) {
+      for( i in this.element.children ) {
+        new DOMElementBuilder( this.element.children[i], this.href, this.page ).build();
+      }
+    }
+  };
+  DOMElementBuilder.prototype.mapElementFieldValuesToDPInstanceFieldValues = function() {
+      
+    var mapper = new DPInstancesFieldValueMapper();
+    mapper.putDPInstances( page.dpInstances );
+    
+    // try map value
+    if( this.element.fieldDataMap.value ) {
+      this.element.fieldDataMap.value = mapper.mapValue( this.element.fieldDataMap.value );
+    }
+    
+    // map attributes
+    var attributeMap = this.element.fieldDataMap.attributes;
+    
+    for( key in attributeMap ) {
+      attributeMap[key] = mapper.mapValue(attributeMap[key]);
+    }
+    
+  };
+  DOMElementBuilder.prototype.addValueIfElementHasOne = function() {
+    if( this.element.fieldDataMap.value ) {
+      var escapedIdSelector = this.idSelectorBuilder.build( this.element.href );
+      
+      $( escapedIdSelector ).append( this.element.fieldDataMap.value );
+    }
+  };
+  DOMElementBuilder.prototype.createElementAttributes = function() {
+      
+    var attributes = { 'id' : this.element.href };
+    
+    var attributeMap = this.element.fieldDataMap.attributes;
+    
+    for( key in attributeMap ) {
+      attributes[key] = attributeMap[key];
+    }
+    
+    return attributes;
+  };
+  DOMElementBuilder.prototype.appendIntoDOM = function() {
+    var escapedParentIdSelector = this.idSelectorBuilder.build( this.parentHref );
+    
+    $( this.elementDef.tag ).attr( this.attributes ).appendTo( escapedParentIdSelector );
+  };
+    
+  DOMElementBuilder.prototype.getElement = function() {
+    return elements[this.href];
+  };
+    
+  DOMElementBuilder.prototype.getElementDef = function() {
+    return elementDefs[ this.element.type ];
+  };
   
   function DPInstancesFieldValueMapper() {};
   DPInstancesFieldValueMapper.prototype.mapValue = function( expression ) {
@@ -411,7 +403,7 @@
   
   $(window).load(function () {
     
-    new DOMBuilder( page ).build();
+    new DOMPageBuilder( page ).build();
     
   });
     
