@@ -17,20 +17,11 @@
     'body' : {
       'href' : 'http://nheise.net/html/elements/body/724352',
       'children' : [
-        'http://nheise.net/html/elements/div/63534',
+        'http://nheise.net/html/elements/h1/73645',
         'http://nheise.net/html/elements/div/264252'
       ]
     },
-    'requestArgs' : { key : 'SUBSYSTEM' },
-    'dataPatterns' : { 
-      'tenant' : {
-        'href' : 'http://nheise.net/tenant',
-        'type' : 'entity',
-        'uriPatternKeyValueMap' : {
-          'key' : 'requestArgs.key'
-        }
-      }
-    }
+    'requestArgs' : { key : 'SYSTEM' }
   };
 
   var elementDefs = {
@@ -71,6 +62,14 @@
         'attributes' : [ 'for', 'class' ],
         'value' : ''
       }
+    },
+    'http://nheise.net/html/elements/h1' : {
+      'href' : 'http://nheise.net/html/elements/h1',
+      'tag' : '<h1></h1>',
+      'fields' : {
+        'attributes' : [ 'class' ],
+        'value' : ''
+      }
     }
   };
   
@@ -80,7 +79,50 @@
       'type' : 'http://nheise.net/html/elements/style',
       'fieldDataMap' : {
         'attributes' : {},
-        'value' : 'label.description { vertical-align: top; } textarea, input { font-family: verdana; font-size: .7em; }'
+        'value' : '* { margin: 0; padding: 0; font-family: verdana; font-size: 1em; outline: 0; } h1 { font-size: 1.3em; margin-bottom: 10px; } .tenantFields label, .tenantFields input, .tenantFields textarea { display: block; } .tenantFields label { margin-top: 5px; }'
+      }
+    },
+    'http://nheise.net/html/elements/h1/73645' : {
+      'href' : 'http://nheise.net/html/elements/h1/73645',
+      'type' : 'http://nheise.net/html/elements/h1',
+      'fieldDataMap' : {
+        'attributes' : {},
+        'value' : 'Tenant'
+      }
+    },
+    'http://nheise.net/html/elements/div/264252' : {
+      'href' : 'http://nheise.net/html/elements/div/264252',
+      'type' : 'http://nheise.net/html/elements/div',
+      'fieldDataMap' : {
+        'attributes' : {
+          'class' : 'tenantFields'
+        }
+      },
+      'children' : [
+        'http://nheise.net/html/elements/label/53426',
+        'http://nheise.net/html/elements/textfield/534263',
+        'http://nheise.net/html/elements/label/352436',
+        'http://nheise.net/html/elements/textarea/423542'
+      ],
+      'dataPatterns' : { 
+        'tenant' : {
+          'href' : 'http://nheise.net/tenant',
+          'type' : 'entity',
+          'uriPatternKeyValueMap' : {
+            'key' : 'requestArgs.key'
+          }
+        }
+      }
+    },
+    'http://nheise.net/html/elements/label/352436' : {
+      'href' : 'http://nheise.net/html/elements/label/352436',
+      'type' : 'http://nheise.net/html/elements/label',
+      'fieldDataMap' : {
+        'attributes' : {
+          'for' : 'http://nheise.net/html/elements/textarea/423542',
+          'class' : 'description'
+        },
+        'value' : 'Beschreibung'
       }
     },
     'http://nheise.net/html/elements/textarea/423542' : {
@@ -91,46 +133,6 @@
         'value' : 'tenant.description'
       }
     },
-    'http://nheise.net/html/elements/div/264252' : {
-      'href' : 'http://nheise.net/html/elements/div/264252',
-      'type' : 'http://nheise.net/html/elements/div',
-      'fieldDataMap' : {
-        'attributes' : {}
-      },
-      'children' : [
-        'http://nheise.net/html/elements/label/352436',
-        'http://nheise.net/html/elements/textarea/423542'
-      ]
-    },
-    'http://nheise.net/html/elements/label/352436' : {
-      'href' : 'http://nheise.net/html/elements/label/352436',
-      'type' : 'http://nheise.net/html/elements/label',
-      'fieldDataMap' : {
-        'attributes' : {
-          'for' : 'http://nheise.net/html/elements/textarea/423542',
-          'class' : 'description'
-        },
-        'value' : 'Beschreibung:'
-      }
-    },
-    'http://nheise.net/html/elements/div/63534' : {
-      'href' : 'http://nheise.net/html/elements/div/63534',
-      'type' : 'http://nheise.net/html/elements/div',
-      'fieldDataMap' : {
-        'attributes' : {}
-      },
-      'children' : [
-        'http://nheise.net/html/elements/label/53426',
-        'http://nheise.net/html/elements/textfield/534263'
-      ]
-    },
-    'http://nheise.net/html/elements/textfield/534263' : {
-      'href' : 'http://nheise.net/html/elements/textfield/534263',
-      'type' : 'http://nheise.net/html/elements/textfield',
-      'fieldDataMap' : {
-        'attributes' : { 'value' : 'tenant.key' }
-      }
-    },
     'http://nheise.net/html/elements/label/53426' : {
       'href' : 'http://nheise.net/html/elements/label/53426',
       'type' : 'http://nheise.net/html/elements/label',
@@ -138,7 +140,14 @@
         'attributes' : {
           'for' : 'http://nheise.net/html/elements/textfield/534263'
         },
-        'value' : 'Tenant-Key:'
+        'value' : 'Tenant-Key'
+      }
+    },
+    'http://nheise.net/html/elements/textfield/534263' : {
+      'href' : 'http://nheise.net/html/elements/textfield/534263',
+      'type' : 'http://nheise.net/html/elements/textfield',
+      'fieldDataMap' : {
+        'attributes' : { 'value' : 'tenant.key' }
       }
     }
   };
@@ -150,16 +159,30 @@
       'fields' : {
         'key' : 'SYSTEM',
         'name' : 'System',
-        'description' : 'Der System Mandat.'
+        'description' : 'Der System Mandant.',
+        'children' : [
+          'http://nheise.net/tenants/SUB1-SYSTEM',
+          'http://nheise.net/tenants/SUB2-SYSTEM'
+        ]
       }
     },
-    'http://nheise.net/tenants/SUBSYSTEM' : {
-      'href' : 'http://nheise.net/tenants/SUBSYSTEM',
+    'http://nheise.net/tenants/SUB1-SYSTEM' : {
+      'href' : 'http://nheise.net/tenants/SUB2-SYSTEM',
       'dp' : 'http://nheise.net/tenant',
       'fields' : {
-        'key' : 'SUBSYSTEM',
-        'name' : 'Sub-System',
-        'description' : 'Der Mandant unter dem System Mandat.',
+        'key' : 'SUB1-SYSTEM',
+        'name' : 'Sub1-System',
+        'description' : 'Der erste Mandant unter dem System Mandant.',
+        'parent' : 'http://nheise.net/tenants/SYSTEM'
+      }
+    },
+    'http://nheise.net/tenants/SUB2-SYSTEM' : {
+      'href' : 'http://nheise.net/tenants/SUB2-SYSTEM',
+      'dp' : 'http://nheise.net/tenant',
+      'fields' : {
+        'key' : 'SUB2-SYSTEM',
+        'name' : 'Sub2-System',
+        'description' : 'Der zweite Mandant unter dem System Mandant.',
         'parent' : 'http://nheise.net/tenants/SYSTEM'
       }
     }
@@ -177,54 +200,38 @@
     }
   };
       
-  function DPInstancesLoader( page ) {
+  function DPInstancesLoader( page, element ) {
     this.page = page;
+    this.element = element;
+    this.dpInstanceURIs = {};
+    this.dataPatterns = {};
   }
   DPInstancesLoader.prototype.load = function() {
-    this.dataPatterns = this.loadDataPattern();
+    this.loadDataPattern();
     
-    this.dpInstanceURIs = this.buildDPInstancesURIs();
+    this.buildDPInstancesURIs();
     
-    this.dpInstances = this.loadDPInstances();
-    
-    return this.dpInstances;
+    this.loadDPInstances();
   };
-    
   DPInstancesLoader.prototype.buildDPInstancesURIs = function() {
-    var dpInstanceURIs = {};
     
     for( dpName in this.dataPatterns ) {
-      dpInstanceURIs[ dpName ] = new DPInstanceURIBuilder( this.dataPatterns[ dpName ], this.page.dataPatterns[ dpName ], this.page.requestArgs ).build(); 
+      this.dpInstanceURIs[ dpName ] = new DPInstanceURIBuilder( this.dataPatterns[ dpName ], this.element.dataPatterns[ dpName ], this.page.requestArgs ).build(); 
     }
-    
-    return dpInstanceURIs;
   };    
   DPInstancesLoader.prototype.loadDPInstances = function() {
-    
-    var dpInstances = {};
-    
     for( dpName in this.dpInstanceURIs ) {
-      
-      dpInstances[ dpName ] = this.getDPInstances( this.dpInstanceURIs[ dpName ] );
-      
+      this.element.dpInstances[ dpName ] = this.getDPInstances( this.dpInstanceURIs[ dpName ] );
     }
-    
-    return dpInstances;
-  };    
-  DPInstancesLoader.prototype.loadDataPattern = function() {
-    var dataPatterns = {};
-    
-    for( dpName in this.page.dataPatterns ) {
-      dataPatterns[ dpName ] = this.getDataPattern( this.page.dataPatterns[ dpName ].href ); 
-    }
-    
-    return dataPatterns;
   };
-    
+  DPInstancesLoader.prototype.loadDataPattern = function() {
+    for( dpName in this.element.dataPatterns ) {
+      this.dataPatterns[ dpName ] = this.getDataPattern( this.element.dataPatterns[ dpName ].href ); 
+    }
+  };  
   DPInstancesLoader.prototype.getDPInstances = function( href ) {
     return dpInstances[ href ];
   };
-  
   DPInstancesLoader.prototype.getDataPattern = function( href ) {
     return dataPatterns[ href ];
   };
@@ -258,12 +265,11 @@
 
   function DOMPageBuilder( page ) {
     this.page = page;
-    this.dpInstanceLoader = new DPInstancesLoader( this.page );
   }
   DOMPageBuilder.prototype.build = function() {
     this.prepareBodyAndHead();
     
-    this.page.dpInstances = this.dpInstanceLoader.load();
+    new DPInstancesLoader( this.page, this.page ).load();
     
     this.buildHead();
     this.buildBody();
@@ -274,26 +280,32 @@
   }
   DOMPageBuilder.prototype.buildHead = function() {
     for( i in this.page.head.children ) {
-      new DOMElementBuilder( this.page.head.children[i], this.page.head.href, this.page ).build();
+      new DOMElementBuilder( this.page.head.children[i], this.page.head.href, this.page.dpInstances, this.page ).build();
     }
     
   }; 
   DOMPageBuilder.prototype.buildBody = function() {
     for( i in this.page.body.children ) {
-      new DOMElementBuilder( this.page.body.children[i], this.page.body.href, this.page ).build();
+      new DOMElementBuilder( this.page.body.children[i], this.page.body.href, this.page.dpInstances, this.page ).build();
     }
   };
   
-  function DOMElementBuilder( href, parentHref, page ) {
+  function DOMElementBuilder( href, parentHref, dpInstances, page ) {
     this.href = href
     this.parentHref = parentHref;
     this.page = page;
+    
+    this.dpInstances = dpInstances || {};
     
     this.idSelectorBuilder = new IdSelectorBuilder();
   };
   
   DOMElementBuilder.prototype.build = function() {
     this.element = this.getElement();
+
+    this.element.dpInstances = this.dpInstances;
+    
+    new DPInstancesLoader( this.page, this.element ).load();
 
     this.elementDef = this.getElementDef();
     
@@ -307,14 +319,14 @@
     
     if( this.element.children ) {
       for( i in this.element.children ) {
-        new DOMElementBuilder( this.element.children[i], this.href, this.page ).build();
+        new DOMElementBuilder( this.element.children[i], this.href, this.element.dpInstances, this.page ).build();
       }
     }
   };
   DOMElementBuilder.prototype.mapElementFieldValuesToDPInstanceFieldValues = function() {
       
     var mapper = new DPInstancesFieldValueMapper();
-    mapper.putDPInstances( page.dpInstances );
+    mapper.putDPInstances( this.element.dpInstances );
     
     // try map value
     if( this.element.fieldDataMap.value ) {
@@ -412,3 +424,4 @@
 <body>
 </body>
 </html>
+
