@@ -59,7 +59,7 @@ var secureArea =
 "request.onreadystatechange = function (aEvt) {" +
 "  if (request.readyState == 4) {" +
 "     if (request.status == 200)" +
-"       alert(request.responseText);" +  
+"       alert('Still authorized');" +  
 "     else" +
 "       alert('Error', request.statusText);" +  
 "  }" +
@@ -73,9 +73,29 @@ var secureArea =
 
 var freeArea =
 "<html>" + 
-"<head></head>" + 
+"<head><script src='http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js'></script></head>" + 
 "<body>" + 
 "<p>free area...</p>" + 
 "<p><a href='/secure'>to secure area...</a></p>" +
+"<form id='login' action='/secure' method='post'>" +
+"<p>User:<input type='text' name='user'/></p>" +
+"<p>Pass:<input type='password' name='pass'/></p>" +
+"<p><input type='submit' value='login'/></p>" +
+"</form>" +
+"<script>\
+var login = $('#login');\
+login.submit( function(){\
+var form = $(this);\
+var action = form.attr('action');\
+alert('onsubmit');\
+$.ajax( {\
+type : 'GET',\
+url : action,\
+username : 'test',\
+password : 'tester',\
+success : function() { alert('success'); }\
+});\
+return false;\
+});</script>" +
 "</body>" +
 "</html>";
