@@ -1,0 +1,49 @@
+<html>
+<head>
+<script src='http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js'></script>
+</head>
+<body>
+  <p>free area...</p>
+  <p>
+    <a href='/secure'>to secure area...</a>
+  </p>
+  <form id='login' action='/login'>
+    <p>
+      User:<input type='text' name='user' />
+    </p>
+    <p>
+      Pass:<input type='password' name='pass' />
+    </p>
+    <p>
+      <input type='submit' value='login' />
+    </p>
+  </form>
+  <ul id="messages"></ul>
+  <script>
+      var login = $( '#login' );
+      login.submit( function() {
+        var form = $( this );
+        var action = form.attr( 'action' );
+        var user = form.find( 'input[name="user"]' ).val();
+        var pass = form.find( 'input[name="pass"]' ).val();
+        $.ajax( {
+          type : 'GET',
+          url : action,
+          dataType : 'json',
+          username : user,
+          password : pass,
+          success : function( data ) {
+            alert( "success # " + data.ref );
+          },
+          statusCode : {
+            403 : function( data, status, thrown ) {
+              alert( "bad # " + data.slice(0, 100) );
+            }
+          }
+        } );
+
+        return false;
+      } );
+    </script>
+</body>
+</html>

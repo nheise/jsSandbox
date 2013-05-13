@@ -5,6 +5,7 @@ var PORT = 1234;
 var SERVER_NAME="RESThttp Test Server";
 
 var http = require('http');
+var fs = require('fs');
 
 var HTTPAuthorization = require( './HTTPAuthorization.js' ).HTTPAuthorization;
 
@@ -34,9 +35,37 @@ function takeRequest(req, res) {
            res.end();
        } 
    }
+   else if(req.url.match(/.+?login.*/)) {
+     
+     if(req.headers.authorization) {
+         
+         var httpAuthorization = new HTTPAuthorization();
+         
+         var credentials = httpAuthorization.extractCredentialsFromRequestHeader( req.headers );
+         
+         console.log( credentials );
+         
+         if( credentials.user == "test" && credentials.password == "tester" ) {
+           res.writeHead( 200, 'OK', { 'Content-Type' : 'application/json' } );
+           res.end( JSON.stringify( { ref : '/secure' } ), 'utf-8' );
+           console.log( 'login successful' );
+         }
+         else {
+           res.writeHead( 403, 'Forbidden', { 'Content-Type' : 'application/json' } );
+           res.end( JSON.stringify( { error : 'Bad credentials.' } ), 'utf-8' );
+         }
+
+     }
+     else {
+         res.writeHead(401, 'Unauthorized', { 'Content-Type' : 'text/plain', 'WWW-Authenticate' : 'Basic realm="Locked Space"' });
+         res.end();
+     } 
+ }
    else {
        res.writeHead(200, 'OK', { 'Content-Type' : 'text/html' });
-        res.end( freeArea, 'binary');
+       var readStream = fs.createReadStream( 'freeArea.html', { encoding: 'utf-8' } );
+       readStream.pipe( res );
+       //res.end( freeArea, 'binary');
    }
 }
 
