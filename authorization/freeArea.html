@@ -18,14 +18,18 @@
       <input type='submit' value='login' />
     </p>
   </form>
-  <ul id="messages"></ul>
-  <script>
+  <script type="text/javascript">
       var login = $( '#login' );
       login.submit( function() {
         var form = $( this );
+
+        var loginButton = form.find( 'input[type="submit"]' );
+        toggleDisabled( loginButton );
+
         var action = form.attr( 'action' );
         var user = form.find( 'input[name="user"]' ).val();
         var pass = form.find( 'input[name="pass"]' ).val();
+
         $.ajax( {
           type : 'GET',
           url : action,
@@ -33,17 +37,37 @@
           username : user,
           password : pass,
           success : function( data ) {
-            alert( "success # " + data.ref );
+            toggleDisabled( loginButton );
+            window.location.href = data.ref;
           },
           statusCode : {
             403 : function( data, status, thrown ) {
-              alert( "bad # " + data.slice(0, 100) );
+              setErrorMessages( $.parseJSON( data.responseText ).error );
+              toggleDisabled( loginButton );
             }
           }
         } );
 
         return false;
       } );
+
+      function setErrorMessages( message ) {
+        
+        var messageElement = '<li>' + message + '</li>';
+        
+        $( '#login' ).after( $( '<ul/>', {
+          'id' : 'messages',
+          html : messageElement
+        } ) );
+      }
+
+      function toggleDisabled( element ) {
+        if ( element.attr( 'disabled' ) ) {
+          element.removeAttr( 'disabled' );
+        } else {
+          element.attr( 'disabled', 'disabled' );
+        }
+      };
     </script>
 </body>
 </html>
