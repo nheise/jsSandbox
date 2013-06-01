@@ -27,28 +27,35 @@
         toggleDisabled( loginButton );
 
         var action = form.attr( 'action' );
-        var user = form.find( 'input[name="user"]' ).val();
-        var pass = form.find( 'input[name="pass"]' ).val();
+        var user = form.find( 'input[name="user"]' );
+        var pass = form.find( 'input[name="pass"]' );
+        
+        var goOn = false;
 
         $.ajax( {
-          type : 'GET',
+          type : 'HEAD',
           url : action,
           dataType : 'json',
-          username : user,
-          password : pass,
-          success : function( data ) {
-            toggleDisabled( loginButton );
-            window.location.href = data.ref;
-          },
+          username : user.val(),
+          password : pass.val(),
+          async : false,
           statusCode : {
+          	200 : function() {
+          	  toggleDisabled( loginButton );
+			  goOn = true;
+			  user.val('');
+			  pass.val('');
+          	},
+          	401 : function( data, status, thrown ) {
+              toggleDisabled( loginButton );
+            },
             403 : function( data, status, thrown ) {
-              setErrorMessages( $.parseJSON( data.responseText ).error );
               toggleDisabled( loginButton );
             }
           }
         } );
 
-        return false;
+        return goOn;
       } );
 
       function setErrorMessages( message ) {

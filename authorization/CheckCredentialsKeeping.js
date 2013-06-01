@@ -45,9 +45,14 @@ function takeRequest(req, res) {
          
          console.log( credentials );
          
-         if( credentials.user == "test" && credentials.password == "tester" ) {
-           res.writeHead( 200, 'OK', { 'Content-Type' : 'application/json' } );
-           res.end( JSON.stringify( { ref : '/secure' } ), 'utf-8' );
+         if( credentials.user == "t" && credentials.password == "t" ) {
+           if( req.method == 'HEAD' ) {
+             res.writeHead( 200, 'OK', { 'Content-Type' : 'application/json' } );
+           }
+           if( req.method == 'GET' ) {
+             res.writeHead( 307, 'OK', { 'Content-Type' : 'application/json', 'Location' : '/secure' } );
+           }
+           res.end();
            console.log( 'login successful' );
          }
          else {
